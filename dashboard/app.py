@@ -32,12 +32,22 @@ UPDATE_INTERVAL_SECS: int  = 3
 
 # --------------------------------------------
 # Initialize a REACTIVE VALUE with a common data structure 
-# Used by all the live data components
+# The reactive value is used to store state (information)
+# Used by all the display components that show this live data.
 # This reactive value is a wrapper around a DEQUE of readings
 # --------------------------------------------
 
 DEQUE_SIZE: int = 5
 reactive_value_wrapper = reactive.value(deque(maxlen=DEQUE_SIZE))
+
+# --------------------------------------------
+# Initialize a REACTIVE CALC that all display components can call
+# to get the latest data and display it.
+# The calculation is invalidated every UPDATE_INTERVAL_SECS
+# to trigger updates.
+# It returns a tuple with everything needed to display the data.
+# Very easy to expand or modify. 
+# --------------------------------------------
 
 @reactive.calc()
 def reactive_calc_combined():
@@ -55,13 +65,14 @@ def reactive_calc_combined():
     # Get a snapshot of the current deque for any further processing
     deque_snapshot = reactive_value_wrapper.get()
 
-    # Processing: Convert deque to DataFrame for display
+    # For Display: Convert deque to DataFrame for display
     df = pd.DataFrame(deque_snapshot)
 
-    # Processing: Get the latest entry 
+    # For Display: Get the latest dictionary entry 
     latest_dictionary_entry = new_dictionary_entry
 
     # Return a tuple with everything we need 
+    # Every time we call this function, we'll get all these values
     return deque_snapshot, df, latest_dictionary_entry
 
 
