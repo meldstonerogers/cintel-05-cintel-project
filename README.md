@@ -29,7 +29,7 @@ Use your GitHub **username** in place of denisecase and your GitHub **repo name*
 git clone https://github.com/denisecase/cintel-05-cintel
 ```
 
-## Run Locally - Initial Setup
+## Run Locally - Initial Start
 
 After cloning your project down to your Documents folder, open the project folder for editing in VS Code.
 
