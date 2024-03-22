@@ -39,66 +39,30 @@ UPDATE_INTERVAL_SECS: int  = 3
 DEQUE_SIZE: int = 5
 reactive_value_wrapper = reactive.value(deque(maxlen=DEQUE_SIZE))
 
-# --------------------------------------------
-# Define a REACTIVE EFFECT to update the reactive value holding our deque
-# Put the data generation logic here
-# Components that depend on this reactive value will be updated automatically
-# Nothing calls a reactive effect - it runs automatically
-# --------------------------------------------
-@reactive.effect
-def reactive_effect_updater():
-    # Invalidate this effect every UPDATE_INTERVAL_SECS to trigger updates
+@reactive.calc()
+def reactive_calc_combined():
+    # Invalidate this calculation every UPDATE_INTERVAL_SECS to trigger updates
     reactive.invalidate_later(UPDATE_INTERVAL_SECS)
 
-    # Data generation goes here
+    # Data generation logic 
     temp = round(random.uniform(-18, -16), 2)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_dictionary_entry = {"temp": temp, "timestamp": timestamp}
     
-    # Call get() to access the deque, then call append() with the new data
+    # get the deque and append the new entry
     reactive_value_wrapper.get().append(new_dictionary_entry)
 
-# --------------------------------------------
-# Reactive calc to get a dataframe from the reactive value
-# Force an update every UPDATE_INTERVAL_SECS
-# --------------------------------------------
+    # Get a snapshot of the current deque for any further processing
+    deque_snapshot = reactive_value_wrapper.get()
 
-@reactive.calc()
-def reactive_calc_generate_df():
-  # Tell Shiny to re-run this calculation at a regular interval
-  reactive.invalidate_later(UPDATE_INTERVAL_SECS)  
+    # Processing: Convert deque to DataFrame for display
+    df = pd.DataFrame(deque_snapshot)
 
-  # Use get() to access the deque
-  deque_snapshot = reactive_value_wrapper.get()
+    # Processing: Get the latest entry 
+    latest_dictionary_entry = new_dictionary_entry
 
-  # Convert the deque to a DataFrame
-  df = pd.DataFrame(deque_snapshot)
-
-  # Return the DataFrame
-  return df
-
-# --------------------------------------------
-# Reactive calc to get temp and timestamp from the reactive value
-# Force an update every UPDATE_INTERVAL_SECS
-# --------------------------------------------
-
-@reactive.calc()
-def reactive_calc_generate_data():
-  # Tell Shiny to re-run this calculation at a regular interval
-  reactive.invalidate_later(UPDATE_INTERVAL_SECS)  
-
-  # Use get() to access the deque
-  current_deque = reactive_value_wrapper.get()
-
-  if current_deque:
-    # if we have data, get the latest entry
-    latest_dictionary_entry = current_deque[-1]
-  else:
-    # if we don't have any data yet, get a default value
-    latest_dictionary_entry = {"temp": "N/A", "timestamp": "N/A"}
-
-  # Return the latest dictionary entry
-  return latest_dictionary_entry
+    # Return a tuple with everything we need 
+    return deque_snapshot, df, latest_dictionary_entry
 
 
 # --------------------------------------------
@@ -148,11 +112,11 @@ def server(input, output, session):
   # by calling ui.output_text()
   # And passing in whatever we name this function as a string
   # --------------
-
   @render.text
   def display_temp():
-    data_dictionary = reactive_calc_generate_data()
-    return f"{data_dictionary['temp']}°C"
+    ''' Get the latest reading and return a temperature string'''
+    deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+    return f"{latest_dictionary_entry['temp']}°C"
 
   # --------------
   # Define a function to render.text with the TIME
@@ -160,13 +124,11 @@ def server(input, output, session):
   # by calling ui.output_text()
   # And passing in whatever we name this function as a string
   # --------------
-
   @render.text
   def display_time():
-    # With Core, we must add this function to the app_ui
-    # by calling ui.output_text("output_display_time")
-    data_dictionary = reactive_calc_generate_data()
-    return f"{data_dictionary['timestamp']}"
+    ''' Get the latest reading and return a timestamp string'''
+    deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+    return f"{latest_dictionary_entry['timestamp']}"
   
   # --------------
   # Define a function to render.data_frame with our DF
@@ -174,22 +136,23 @@ def server(input, output, session):
   # by calling ui.output_data_frame()
   # And passing in whatever we name this function as a string
   # --------------
-
   @render.data_frame
   def display_df():
-    return reactive_calc_generate_df()
+    ''' Get the latest reading and return a dataframe with current readings'''
+    deque_snapshot, df, latest_dictionary_entry =  reactive_calc_combined()
+    return df
 
   # --------------
   # Define a function to render_widget with a PLOT
   # With Core, we must add this function to the app_ui
-  # by calling output_widget() - note this does not use ui.
+  # by calling output_widget() - NOT ui.output_widget - 
   # And passing in whatever we name this function as a string
   # --------------
 
   @render_widget
   def display_plot():
-    # Fetch the DataFrame from the reactive calc function
-    df = reactive_calc_generate_df()
+    # Fetch from the reactive calc function
+    deque_snapshot, df, latest_dictionary_entry =  reactive_calc_combined()
 
     # Ensure the DataFrame is not empty before plotting
     if not df.empty:

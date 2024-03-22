@@ -16,38 +16,24 @@ Go to PyShiny Playground at <https://shinylive.io/py/examples/#basic-app>.
 
 Copy and paste content from [dashboard/app.py](dashboard/app.py) and run.
 
-If running in the browser, don't include any of these packages in your requirements.txt file:
+The PyShiny Playground includes these packages already, so you won't need requirements.txt.
 
 - <https://shiny.posit.co/py/docs/shinylive.html#python-packages>
-
-You may not need any as all of these are included:
-
-- faicons
-- pandas
-- pyarrow
-- scipy
-- shiny
-- shinylive
-- shinywidgets
-- plotly
 
 ## Get the Code
 
 Fork this project into your own GitHub account and/or just borrow code from app.py.
-
 Clone your GitHub repo down to your local machine.
-
-Important: Use your GitHub username in place of denisecase and your GitHub repo name in place of cintel-05-cintel.
-
+Use your GitHub **username** in place of denisecase and your GitHub **repo name** in place of cintel-05-cintel.
 [GitHub CLI](https://cli.github.com/) may work better on some machines.
 
 ```shell
 git clone https://github.com/denisecase/cintel-05-cintel
 ```
 
-## Run Locally
+## Run Locally - Initial Setup
 
-Open the project folder for editing in VS Code.
+After cloning your project down to your Documents folder, open the project folder for editing in VS Code.
 
 Create a local project virtual environment named .venv, activate it, and install the requirements.
 
@@ -71,7 +57,16 @@ shiny run --reload --launch-browser dashboard/app.py
 
 Open a browser to <http://127.0.0.1:8000/> and test the app.
 
-## Deploy to GitHub Pages
+## Run Locally - Subsequent Starts
+
+Open a terminal (VS Code menu "View" / "Terminal") in the root project folder and run these commands.
+
+```shell
+.venv\Scripts\Activate
+shiny run --reload --launch-browser dashboard/app.py
+```
+
+## After Changes, Export to Docs Folder
 
 Export to docs folder and test GitHub Pages locally.
 
