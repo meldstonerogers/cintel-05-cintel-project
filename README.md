@@ -13,10 +13,8 @@ We'll add:
 ## Try in the Browser
 
 Go to PyShiny Playground at <https://shinylive.io/py/examples/#basic-app>.
-
 Copy and paste content from [dashboard/app.py](dashboard/app.py) and run.
-
-The PyShiny Playground includes these packages already, so you won't need requirements.txt.
+The PyShiny Playground includes these packages already, so you won't need requirements.txt:
 
 - <https://shiny.posit.co/py/docs/shinylive.html#python-packages>
 
