@@ -82,18 +82,30 @@ def reactive_calc_combined():
     return deque_snapshot, df, latest_dictionary_entry
 
 
-
+# CSS for scrollable content
+style = """
+<style>
+    body {
+        overflow-y: auto;
+        padding: 20px;
+    }
+    .shiny-main-content {
+        max-height: 80vh; /* Limit the height of the main content */
+        overflow-y: auto; /* Add vertical scrollbar if needed */
+    }
+</style>
+"""
 
 # Define the Shiny UI Page layout
 # Call the ui.page_opts() function
 # Set title to a string in quotes that will appear at the top
 # Set fillable to True to use the whole page width for the UI
-ui.page_opts(title="PyShiny Express: Live Data Example", fillable=True)
+ui.page_opts(title="Melissa's PyShiny Express: Live Data Example", fillable=True)
 
 # Sidebar is typically used for user interaction/information
 # Note the with statement to create the sidebar followed by a colon
 # Everything in the sidebar is indented consistently
-with ui.sidebar(open="open"):
+with ui.sidebar(open="open", bg="##301A4B"):
 
     ui.h2("Antarctic Explorer", class_="text-center")
     ui.p(
@@ -123,7 +135,7 @@ with ui.sidebar(open="open"):
 
 with ui.layout_columns():
     with ui.value_box(
-        showcase=icon_svg("sun"),
+        showcase=icon_svg("thermometer-0"),
         theme="bg-gradient-blue-purple",
     ):
 
