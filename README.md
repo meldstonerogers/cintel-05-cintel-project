@@ -40,18 +40,26 @@ If you miss the window, after installing, select from the VS Code menu, View / C
 
 Open a terminal (VS Code menu "View" / "Terminal") in the root project folder and run these commands (for Windows - the activate command is slightly different Linux/Mac).
 
-```shell
-py -m venv .venv
-.venv\Scripts\Activate
-py -m pip install --upgrade pip setuptools
-py -m pip install --upgrade -r requirements.txt
+```zsh
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install --upgrade pip setuptools
+python3 -m pip install --upgrade -r requirements.txt
 ```
-
+Install required packages and dependencies. 
+```
+pip install -r requirements.txt
+```
+Freeze dependencies to requirements.txt  
+```
+python3 -m pip freeze > requirements.txt
+```
 Open a terminal (VS Code menu "View" / "Terminal") in the root project folder and run these commands.
 
-```shell
+```zsh
 shiny run --reload --launch-browser dashboard/app.py
 ```
+
 
 Open a browser to <http://127.0.0.1:8000/> and test the app.
 
@@ -59,8 +67,9 @@ Open a browser to <http://127.0.0.1:8000/> and test the app.
 
 Open a terminal (VS Code menu "View" / "Terminal") in the root project folder and run these commands.
 
-```shell
-.venv\Scripts\Activate
+```zsh
+python3 -m venv venv
+source venv/bin/activate
 shiny run --reload --launch-browser dashboard/app.py
 ```
 
@@ -70,19 +79,19 @@ Export to docs folder and test GitHub Pages locally.
 
 Open a terminal (VS Code menu "Terminal" / "New Terminal") in the root project folder and run these commands.
 
-```shell
+```zsh
 shiny static-assets remove
 shinylive export dashboard docs
-py -m http.server --directory docs --bind localhost 8008
+python3 -m http.server --directory docs --bind localhost 8009
 ```
 
-Open a browser to <http://[::1]:8008/> and test the Pages app.
+Open a browser to <http://[::1]:8009/> and test the Pages app.
 
 ## Push Changes back to GitHub
 
 Open a terminal (VS Code menu "Terminal" / "New Terminal") in the root project folder and run these commands.
 
-```shell
+```zsh
 git add .
 git commit -m "Useful commit message"
 git push -u origin main
