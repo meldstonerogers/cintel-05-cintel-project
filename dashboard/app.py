@@ -167,7 +167,6 @@ with ui.layout_columns():
             return f"{latest_dictionary_entry['timestamp']}"
 
 with ui.layout_columns():
-#with ui.card(full_screen=True, height="800px"):
         with ui.card(full_screen=True):
             ui.card_header("Most Recent Readings")
 
