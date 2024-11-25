@@ -1,6 +1,6 @@
 # cintel-05-cintel
 Cintel Project 5
-Melissa Stone Rogers, [GitHub](https://github.com/meldstonerogers/cintel-05-cintel)
+Melissa Stone Rogers, [GitHub](https://github.com/meldstonerogers/cintel-05-cintel-project)
 
 ## Introduction
 Professional project using python, shiny, and reactive.calc function to publish a reactive shiny app with continuous intelligence. 
