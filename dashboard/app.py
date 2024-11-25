@@ -86,12 +86,13 @@ def reactive_calc_combined():
 style = """
 <style>
     body {
-        overflow-y: auto;
+        overflow-y: scroll;  /* Always show the vertical scrollbar */
         padding: 20px;
+        height: 100vh;        /* Ensure the body takes full viewport height */
     }
     .shiny-main-content {
-        max-height: 80vh; /* Limit the height of the main content */
-        overflow-y: auto; /* Add vertical scrollbar if needed */
+        max-height: 80vh;     /* Limit the height of the main content */
+        overflow-y: scroll;   /* Always add vertical scrollbar if needed */
     }
 </style>
 """
@@ -160,104 +161,108 @@ with ui.layout_columns():
             deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
             return f"{latest_dictionary_entry['timestamp']}"
 
-
 with ui.layout_columns():
-    with ui.card(full_scree=True):
-        ui.card_header("Chart with Current Temperature Trend")
-        @render_plotly
-        def display_plot():
-            # Fetch from the reactive calc function
-            deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+#with ui.card(full_screen=True, height="800px"):
+        with ui.card(full_screen=True):
+            ui.card_header("Most Recent Readings")
 
-            # Ensure the DataFrame is not empty before plotting
-            if not df.empty:
-                # Convert the 'timestamp' column to datetime for better plotting
-                df["timestamp"] = pd.to_datetime(df["timestamp"])
-
-                # Create scatter plot for readings
-                # pass in the df, the name of the x column, the name of the y column,
-                # and more
-            
-                fig = px.scatter(df,
-                x="timestamp",
-                y="temp",
-                title="Temperature Readings with Regression Line",
-                labels={"temp": "Temperature (°C)", "timestamp": "Time"},
-                )
-
-                # Add Emoji symbols as "text" on the markers
-                fig.update_traces(
-                    marker=dict(size=.5, color="dark blue"),  # Marker customization
-                    text=["❄️" for _ in range(len(df))],  # Snowflake emoji for all points
-                    textposition="middle center",  # Position of the emoji
-                    mode="markers+text"  # Show both marker and text
-                )
-                
-                # Linear regression - we need to get a list of the
-                # Independent variable x values (time) and the
-                # Dependent variable y values (temp)
-                # then, it's pretty easy using scipy.stats.linregress()
-
-                # For x let's generate a sequence of integers from 0 to len(df)
-                sequence = range(len(df))
-                x_vals = list(sequence)
-                y_vals = df["temp"]
-
-                slope, intercept, r_value, p_value, std_err = stats.linregress(x_vals, y_vals)
-                df['best_fit_line'] = [slope * x + intercept for x in x_vals]
-
-                # Add the regression line to the figure
-                fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines', name='Regression Line', line=dict(color='darkblue', width=2))
-
-                # Update layout as needed to customize further
-                fig.update_layout(
-                    xaxis_title="Time",
-                    yaxis_title="Temperature (°C)",
-                    plot_bgcolor='#F0F3F1',
-                    paper_bgcolor='#434343',
-                    font=dict(color='white'), 
-                    ),
-
-            return fig
-
-
-    with ui.value_box(
-        showcase=icon_svg("thermometer"),
-        theme="bg-gradient-blue-purple",
-    ):
-        "Average Temperature Last 24 Hours"
-        @render.text
-        def display_avgtemp():
-                """Get the average temperature for the last 24 hours."""
+            @render.data_frame
+            def display_df():
+                """Get the latest reading and return a dataframe with current readings"""
                 deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+                pd.set_option('display.width', None)        # Use maximum width
+                return render.DataGrid( df,width="100%")
 
-                # Ensure the DataFrame is not empty
-                if not df.empty:
-                    # Convert the 'timestamp' column to datetime for filtering
-                    df["timestamp"] = pd.to_datetime(df["timestamp"])
+        with ui.value_box(
+                showcase=icon_svg("thermometer"),
+                theme="bg-gradient-blue-purple",
+            ):
+                "Average Temperature Last 24 Hours"
+                @render.text
+                def display_avgtemp():
+                        """Get the average temperature for the last 24 hours."""
+                        deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
 
-                    # Filter for the last 24 hours
-                    now = pd.Timestamp.now()
-                    last_24_hours = df[df["timestamp"] >= now - pd.Timedelta(hours=24)]
+                        # Ensure the DataFrame is not empty
+                        if not df.empty:
+                            # Convert the 'timestamp' column to datetime for filtering
+                            df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-                    # Compute the average temperature if there are any readings
-                    if not last_24_hours.empty:
-                        avg_temp = last_24_hours["temp"].mean()
-                        return f"{avg_temp:.2f} °C"
-                    else:
-                        return "No temperature readings in the last 24 hours."
+                            # Filter for the last 24 hours
+                            now = pd.Timestamp.now()
+                            last_24_hours = df[df["timestamp"] >= now - pd.Timedelta(hours=24)]
 
-                return "No data available."
+                            # Compute the average temperature if there are any readings
+                            if not last_24_hours.empty:
+                                avg_temp = last_24_hours["temp"].mean()
+                                return f"{avg_temp:.2f} °C"
+                            else:
+                                return "No temperature readings in the last 24 hours."
+
+                        return "No data available."
 
 
-#with ui.card(full_screen=True, min_height="40%"):
-with ui.card(full_screen=True):
-    ui.card_header("Most Recent Readings")
-
-    @render.data_frame
-    def display_df():
-        """Get the latest reading and return a dataframe with current readings"""
+with ui.card(full_scree=True):
+    ui.card_header("Chart with Current Temperature Trend")
+    @render_plotly
+    def display_plot():
+        # Fetch from the reactive calc function
         deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
-        pd.set_option('display.width', None)        # Use maximum width
-        return render.DataGrid( df,width="100%")
+
+        # Ensure the DataFrame is not empty before plotting
+        if not df.empty:
+            # Convert the 'timestamp' column to datetime for better plotting
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+            # Create scatter plot for readings
+            # pass in the df, the name of the x column, the name of the y column,
+            # and more
+        
+            fig = px.scatter(df,
+            x="timestamp",
+            y="temp",
+            title="Temperature Readings with Regression Line",
+            labels={"temp": "Temperature (°C)", "timestamp": "Time"},
+            )
+
+            # Add Emoji symbols as "text" on the markers
+            fig.update_traces(
+                marker=dict(size=.5, color="dark blue"),  # Marker customization
+                text=["❄️" for _ in range(len(df))],  # Snowflake emoji for all points
+                textposition="middle center",  # Position of the emoji
+                mode="markers+text"  # Show both marker and text
+            )
+            
+            # Linear regression - we need to get a list of the
+            # Independent variable x values (time) and the
+            # Dependent variable y values (temp)
+            # then, it's pretty easy using scipy.stats.linregress()
+
+            # For x let's generate a sequence of integers from 0 to len(df)
+            sequence = range(len(df))
+            x_vals = list(sequence)
+            y_vals = df["temp"]
+
+            slope, intercept, r_value, p_value, std_err = stats.linregress(x_vals, y_vals)
+            df['best_fit_line'] = [slope * x + intercept for x in x_vals]
+
+            # Add the regression line to the figure
+            fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines', name='Regression Line', line=dict(color='darkblue', width=2))
+
+            # Update layout as needed to customize further
+            fig.update_layout(
+                xaxis_title="Time",
+                yaxis_title="Temperature (°C)",
+                plot_bgcolor='#F0F3F1',
+                paper_bgcolor='#434343',
+                font=dict(color='white'), 
+                ),
+
+        return fig
+
+
+    
+
+
+
 
