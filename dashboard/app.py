@@ -101,7 +101,12 @@ style = """
 # Call the ui.page_opts() function
 # Set title to a string in quotes that will appear at the top
 # Set fillable to True to use the whole page width for the UI
-ui.page_opts(title="Melissa's PyShiny Express: Live Data Example", fillable=True, theme=theme.darkly, head=style) 
+ui.page_opts(
+     title="Melissa's PyShiny Express: Live Data Example", 
+     fillable=True, 
+     theme=theme.darkly, 
+     head=ui.HTML('<link rel="icon" href="www/favicon.ico" type="image/x-icon">')
+     ) 
 
 
 # Sidebar is typically used for user interaction/information
@@ -259,6 +264,9 @@ with ui.card(full_scree=True):
                 ),
 
         return fig
+
+import warnings
+warnings.simplefilter("ignore", category=RuntimeWarning)
 
 
     
